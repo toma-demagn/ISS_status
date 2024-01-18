@@ -1,93 +1,27 @@
 # asl-250124
 
+The solution must be pushed to Gitlab at least for **the day of the interview at 08:00am** so that we also have some time to prepare on our side.
 
+## Code review - backend
 
-## Getting started
+The goal of the exercise is to create REST endpoints exposing the status of the International Space Station. This information can be retrieved of the ISS can be retrieved from https://api.wheretheiss.at/v1/satellites/25544. 
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+See https://wheretheiss.at/w/developer for more information. 
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+- The above API (wheretheiss.at) should be called not more than once every 20s, up to you to decide how to put that restriction in place. 
+- The project should expose a GET resource at /iss/illumination that returns a list of time windows during which the ISS was exposed to the sun, until present time. 
+- The project should expose a GET resource at /iss/position that returns the latitude and longitude of the ISS at present time and a boolean indicating if the ISS is exposed to the sun at this position.
+- For persistence, in-memory storage is fine for now, but nothing stops you from using a proper database if you want to. 
+- The code should be unit tested and a diagram should be produced to document the architecture of the solution. 
 
-## Add your files
+We recommend to use the following technologies for this exercise: Quarkus (Java) or FastAPI (Python), if not possible please justify.
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+## Code review - frontend
 
-```
-cd existing_repo
-git remote add origin https://gitlab.com/blargepret/asl-250124.git
-git branch -M main
-git push -uf origin main
-```
+As an aerospace company, we work with a lot of geospatial data, that we display on interactive maps. In this exercise, we ask you to build a small interface to display the information coming from the backend of the previous exercise
 
-## Integrate with your tools
+- the information should be displayed to the user through a web interface displaying the earth with the free tier of Mapbox, OpenLayers, CesiumJS or any similar technology
+- the current position of the ISS must be displayed as well as an indicator of whether it is exposed or not to the sun
+- the known illumination time windows of the ISS, you can choose how to display the information (popup on hover, list on the side…) but it must be neat and clear.
 
-- [ ] [Set up project integrations](https://gitlab.com/blargepret/asl-250124/-/settings/integrations)
-
-## Collaborate with your team
-
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
-
-## Test and Deploy
-
-Use the built-in continuous integration in GitLab.
-
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
-
-***
-
-# Editing this README
-
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
-
-## Suggestions for a good README
-
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
-
-## Name
-Choose a self-explaining name for your project.
-
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
-
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
-
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
-
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
-
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
-
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
-
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
-
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+We recommend to use the following technologies for this exercise: Vue or React or Angular for component design and Tailwind CSS for styling, if not possible please justify.
