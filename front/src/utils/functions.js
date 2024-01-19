@@ -1,14 +1,24 @@
 import axios from 'axios';
 import {getGroundTracks} from "tle.js";
 
-// Function to fetch satellite data
 export const fetchSatelliteData = async() => {
     try {
-        const response = await axios.get('https://api.wheretheiss.at/v1/satellites/25544');
-        const data = response.data;
+        const response = await axios.get('http://127.0.0.1:8000/iss/position');
+        var data = response.data;
+        const responseIllum = await axios.get('http://127.0.0.1:8000/iss/illumination');
+        const illuminations = responseIllum.data;
+        data = data && illuminations ? {...data, illuminations} : data
+        console.log(data);
+        return data;
+    } catch (error) {
+        console.error(`Error fetching satellite data: ${error}`);
+    }
+}
 
-        // Retrieve TLE data
-        const tle = (await fetchSatelliteTLE()).data;
+export const fetchTLE = async() =>  {
+    try {
+        const response = await axios.get('https://api.wheretheiss.at/v1/satellites/25544/tles');
+        const tle = response.data;
         const header = tle.header;
         const line1 = tle.line1;
         const line2 = tle.line2;
@@ -21,20 +31,8 @@ export const fetchSatelliteData = async() => {
             stepMS: 1000,
             isLngLatFormat: false,
         });
-        data.threeOrbitsArr = threeOrbitsArr;
-        console.log(data)
-        return data;
+        return {"coordinates": threeOrbitsArr[1]};
     } catch (error) {
         console.error(`Error fetching satellite data: ${error}`);
     }
 }
-
-
-export const fetchSatelliteTLE = async() =>  {
-    try {
-        return await axios.get('https://api.wheretheiss.at/v1/satellites/25544/tles');
-    } catch (error) {
-        console.error(`Error fetching satellite data: ${error}`);
-    }
-}
-
