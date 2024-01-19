@@ -16,14 +16,6 @@ function mapboxProvider(x, y, z, dpr) {
     return `https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/${z}/${x}/${y}${dpr >= 2 ? '@2x' : ''}?access_token=${REACT_APP_MAPBOX_ACCESS_TOKEN}`;
 }
 
-function CustomMarker({ anchor, onMouseOver, onMouseOut }) {
-    return (
-        <Marker anchor={anchor} color={"transparent"} onMouseOver={onMouseOver} onMouseOut={onMouseOut}>
-            <div style={{ width: '7%', height: '7%', borderRadius: '50%', backgroundColor: 'transparent' }} />
-        </Marker>
-    );
-}
-
 function SatelliteMap({data}) {
     const latitude = data.latitude;
     const longitude = data.longitude;
@@ -71,11 +63,6 @@ function SatelliteMap({data}) {
                 onMouseOut={() => setShowPopup(false)}
                 width={window.innerWidth * 0.08}
                 height={window.innerHeight * 0.08}
-            />
-            <CustomMarker
-                anchor={[latitude, longitude]}
-                onMouseOver={() => setShowPopup(true)}
-                onMouseOut={() => setShowPopup(false)}
             />
             <Marker
                 anchor={[latitude, longitude]}
