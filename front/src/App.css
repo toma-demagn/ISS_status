@@ -28,6 +28,20 @@
   color: #61dafb;
 }
 
+.imageISS {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  transform: translateX(-950%) translateY(50%);
+  width: 5%;
+  pointer-events: none;
+}
+
+.pigeon-marker {
+  border: none !important;
+}
+
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
@@ -35,4 +49,6 @@
   to {
     transform: rotate(360deg);
   }
+
+
 }
