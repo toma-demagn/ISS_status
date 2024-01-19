@@ -19,44 +19,46 @@ function mapboxProvider(x, y, z, dpr) {
 function SatelliteMap({data}) {
     const latitude = data.latitude;
     const longitude = data.longitude;
+    const isIlluminated = data.is_illuminated;
+    const pathImage = isIlluminated ? markerImageMoon : markerImageSun;
     const [showPopup, setShowPopup] = useState(false);
-    const coordinates = data.threeOrbitsArr[1].map(([lng, lat]) => [lat, lng]);
+    const TlEData = data.TLEData;
+    // The map function is used to reverse lats and lngs
+    const coordinates = TlEData ? TlEData.coordinates.map(([lng, lat]) => [lat, lng]) : [];
     const screenWidth = window.innerWidth;
     const zoomValue = Math.log2(screenWidth / TILE_SIZE);
-    const pathImage = data.visibility === "eclipsed" ? markerImageMoon : markerImageSun;
+    const illuminations = data.illuminations;
     return (
         <Map height={screenWidth * HEIGHT_RATIO}
              width={screenWidth}
              defaultCenter={[0, 0]}
              defaultZoom={zoomValue}
              provider={mapboxProvider}>
-            <GeoJson
-                data={{
-                    type: 'FeatureCollection',
-                    features: [{
-                        type: 'Feature',
-                        geometry: {
-                            type: 'LineString',
-                            coordinates,
+            {TlEData && (
+                <GeoJson
+                    data={{
+                        type: 'FeatureCollection',
+                        features: [{
+                            type: 'Feature',
+                            geometry: {
+                                type: 'LineString',
+                                coordinates,
+                            },
+                            properties: {
+                                prop0: 'value0',
+                                prop1: 0.0,
+                            },
                         },
-                        properties: {
-                            prop0: 'value0',
-                            prop1: 0.0,
-                        },
-                    },
-                    ],
-                }}
-                styleCallback={(feature, hover) => {
-                    if (feature.geometry.type === 'LineString') {
-                        return {strokeWidth: '2', stroke: 'black'}
-                    }
-                    return {fill: '#d4e6ec99', strokeWidth: '1', stroke: 'white', r: '20'}
-                }}
-
-
-            />
-
-
+                        ],
+                    }}
+                    styleCallback={(feature, hover) => {
+                        if (feature.geometry.type === 'LineString') {
+                            return {strokeWidth: '2', stroke: 'black'}
+                        }
+                        return {fill: '#d4e6ec99', strokeWidth: '1', stroke: 'white', r: '20'}
+                    }}
+                />
+            )}
             <Marker
                 anchor={[latitude, longitude]}
                 onMouseOver={() => setShowPopup(true)}
@@ -73,14 +75,14 @@ function SatelliteMap({data}) {
             {showPopup && (
                 <Overlay anchor={[latitude, longitude]} offset={[120, 79]}>
                     <div style={{background: 'white', borderRadius: '10px', padding: '10px'}}>
-                        <p>Popup content here</p>
+                        {illuminations ? (
+                            <pre>{illuminations.join('\n')}</pre>
+                        ) : (
+                            <p>No illuminations registered yet</p>
+                        )}
                     </div>
                 </Overlay>
             )}
-
-
-
-
 
         </Map>
     );

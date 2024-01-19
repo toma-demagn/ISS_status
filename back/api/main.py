@@ -1,24 +1,34 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
+from fastapi.middleware.cors import CORSMiddleware
 import requests
 from apscheduler.schedulers.background import BackgroundScheduler
 from utils.logger import log
 
 app = FastAPI()
 
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # for storing the rolling API responses
 iss_data = None
 
 # list of timestamps where the ISS was illuminated
 illuminations_times = []
-ILLUMINATION_TIMES_LIMIT = 10
+ILLUMINATION_TIMES_DEFAULT_LIMIT = 10
 
 iss_status = {}
 
 
 @app.get("/iss/illumination")
-async def get_illumination():
+async def get_illumination(limit: int = Query(ILLUMINATION_TIMES_DEFAULT_LIMIT)):
     # returning the last illumination times
-    return illuminations_times[-ILLUMINATION_TIMES_LIMIT:]
+    return illuminations_times[-limit:]
 
 
 @app.get("/iss/position")
