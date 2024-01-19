@@ -17,17 +17,21 @@ function mapboxProvider(x, y, z, dpr) {
 }
 
 function SatelliteMap({data}) {
-    const latitude = data.latitude;
-    const longitude = data.longitude;
-    const isIlluminated = data.is_illuminated;
+    let latitude = data?.latitude;
+    let longitude = data?.longitude;
+
+    // If latitude and longitude are not set, default them to 0
+    latitude = latitude || 0;
+    longitude = longitude || 0;
+    const isIlluminated = data?.is_illuminated;
     const pathImage = isIlluminated ? markerImageMoon : markerImageSun;
     const [showPopup, setShowPopup] = useState(false);
-    const TlEData = data.TLEData;
+    const TlEData = data?.TLEData;
     // The map function is used to reverse lats and lngs
     const coordinates = TlEData ? TlEData.coordinates.map(([lng, lat]) => [lat, lng]) : [];
     const screenWidth = window.innerWidth;
     const zoomValue = Math.log2(screenWidth / TILE_SIZE);
-    const illuminations = data.illuminations;
+    const illuminations = data?.illuminations;
     return (
         <Map height={screenWidth * HEIGHT_RATIO}
              width={screenWidth}
@@ -75,7 +79,7 @@ function SatelliteMap({data}) {
             {showPopup && (
                 <Overlay anchor={[latitude, longitude]} offset={[120, 79]}>
                     <div style={{background: 'white', borderRadius: '10px', padding: '10px'}}>
-                        {illuminations ? (
+                        {(illuminations && illuminations.length > 0) ? (
                             <pre>{illuminations.join('\n')}</pre>
                         ) : (
                             <p>No illuminations registered yet</p>

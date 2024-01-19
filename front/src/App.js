@@ -38,7 +38,7 @@ function App() {
 
     return (
         <div className="App">
-            {mergedData && <SatelliteMap data={mergedData} />}
+            <SatelliteMap data={mergedData} />
         </div>
     );
 }
