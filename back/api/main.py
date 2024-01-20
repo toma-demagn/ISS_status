@@ -24,7 +24,7 @@ iss_data = None
 
 # list of time windows where the ISS was illuminated
 illuminations_time_windows = []
-ILLUMINATION_TIME_WINDOWS_LIMIT = 10
+DEFAULT_ILLUMINATION_TIME_WINDOWS_LIMIT = 10
 
 # variables to compute time windows
 window_start, window_end = datetime.min, datetime.min
@@ -33,7 +33,7 @@ iss_status = {}
 
 
 @app.get("/iss/illumination")
-async def get_illumination(limit: int = Query(ILLUMINATION_TIME_WINDOWS_LIMIT)):
+async def get_illumination(limit: int = Query(DEFAULT_ILLUMINATION_TIME_WINDOWS_LIMIT)):
     windows = illuminations_time_windows + ([(window_start, window_end)] if (window_end - window_start).total_seconds() > 0 else [])
     # returning the last limit illumination times
     if limit == 0:
