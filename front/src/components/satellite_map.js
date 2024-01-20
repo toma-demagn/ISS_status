@@ -16,6 +16,11 @@ function mapboxProvider(x, y, z, dpr) {
     return `https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/${z}/${x}/${y}${dpr >= 2 ? '@2x' : ''}?access_token=${REACT_APP_MAPBOX_ACCESS_TOKEN}`;
 }
 
+function convertTimestamp(timestamp) {
+    const date = new Date(timestamp * 1000);
+    return date.toLocaleString();
+}
+
 function SatelliteMap({data}) {
     let latitude = data?.latitude;
     let longitude = data?.longitude;
@@ -79,8 +84,11 @@ function SatelliteMap({data}) {
             {showPopup && (
                 <Overlay anchor={[latitude, longitude]} offset={[120, 79]}>
                     <div style={{background: 'white', borderRadius: '10px', padding: '10px'}}>
-                        {(illuminations && illuminations.length > 0) ? (
-                            <pre>{illuminations.join('\n')}</pre>
+                        {illuminations && illuminations.length > 0 ? (
+                            <>
+                                <h2>{`Last ${illuminations.length} illuminations:`}</h2>
+                                <pre>{illuminations.map(convertTimestamp).join('\n')}</pre>
+                            </>
                         ) : (
                             <p>No illuminations registered yet</p>
                         )}
