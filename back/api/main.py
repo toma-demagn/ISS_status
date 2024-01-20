@@ -1,7 +1,11 @@
+from datetime import datetime
+
 from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 import requests
 from apscheduler.schedulers.background import BackgroundScheduler
+
+from utils import logger
 from utils.logger import log
 
 app = FastAPI()
@@ -18,17 +22,21 @@ app.add_middleware(
 # for storing the rolling API responses
 iss_data = None
 
-# list of timestamps where the ISS was illuminated
-illuminations_times = []
-ILLUMINATION_TIMES_DEFAULT_LIMIT = 10
+# list of time windows where the ISS was illuminated
+illuminations_time_windows = []
+ILLUMINATION_TIME_WINDOWS_LIMIT = 10
+
+# variables to compute time windows
+window_start, window_end = datetime.min, datetime.min
 
 iss_status = {}
 
 
 @app.get("/iss/illumination")
-async def get_illumination(limit: int = Query(ILLUMINATION_TIMES_DEFAULT_LIMIT)):
+async def get_illumination(limit: int = Query(ILLUMINATION_TIME_WINDOWS_LIMIT)):
     # returning the last illumination times
-    return illuminations_times[-limit:]
+    return (illuminations_time_windows[-limit:] +
+            ([(window_start, window_end)] if (window_end - window_start).total_seconds() > 0 else []))
 
 
 @app.get("/iss/position")
@@ -36,18 +44,33 @@ async def get_position():
     return iss_status
 
 
-def illumination(func):
+def track_illumination(func):
     def wrapper(*args, **kwargs):
+        prev_illumination_state = iss_status.get('is_illuminated', None)
+
+        # Call the decorated function
         result = func(*args, **kwargs)
-        # Append the 'visibility' field of the response to the illuminations_times list
-        if result.get('visibility') == 'daylight':
-            illuminations_times.append(result.get('timestamp'))
+        global window_start
+        global window_end
+        curr_illumination_state = iss_status.get('is_illuminated', None)
+        if not prev_illumination_state and curr_illumination_state or window_start == datetime.min:
+            window_start = datetime.now()
+
+        if iss_status.get('is_illuminated'):
+            window_end = datetime.now()
+
+        # total_seconds is used because seconds would give only the seconds part of the date diff
+        if (window_end - window_start).total_seconds() > 0 and not curr_illumination_state:
+            illuminations_time_windows.append((window_start, window_end))
+            window_start, window_end = datetime.min, datetime.min
+        print(curr_illumination_state, prev_illumination_state, (window_end - window_start).total_seconds() > 0,
+              iss_status)
         return result
 
     return wrapper
 
 
-def position(func):
+def register_iss_status(func):
     def wrapper(*args, **kwargs):
         result = func(*args, **kwargs)
         # Update the 'latitude' and 'longitude' fields of the iss_status dictionary
@@ -59,8 +82,8 @@ def position(func):
     return wrapper
 
 
-@position
-@illumination
+@track_illumination
+@register_iss_status
 @log
 def fetch_iss_data():
     global iss_data
@@ -70,5 +93,5 @@ def fetch_iss_data():
 
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(fetch_iss_data, 'interval', seconds=30)
+scheduler.add_job(fetch_iss_data, 'interval', seconds=20)
 scheduler.start()
