@@ -1,5 +1,7 @@
 import {GeoJson, Map, Marker, Overlay} from "pigeon-maps";
 import React, {useState} from 'react';
+import GeoJSONTerminator from "@webgeodatavore/geojson.terminator";
+
 
 import markerImageMoon from '../assets/iss_moon.png';
 import markerImageSun from '../assets/iss_sun.png';
@@ -34,12 +36,22 @@ function SatelliteMap({data}) {
     const screenWidth = window.innerWidth;
     const zoomValue = Math.log2(screenWidth / TILE_SIZE);
     const illuminations = data?.illuminations;
+
+    var nightAreaGeoJson = new GeoJSONTerminator();
+
     return (
         <Map height={screenWidth * HEIGHT_RATIO}
              width={screenWidth}
              defaultCenter={[0, 0]}
              defaultZoom={zoomValue}
              provider={mapboxProvider}>
+
+            <GeoJson
+                data={nightAreaGeoJson}
+                styleCallback={() => ({ fill: 'rgba(0, 0, 0, 0.5)' })}
+            />
+
+
             {TlEData && (
                 <GeoJson
                     data={{

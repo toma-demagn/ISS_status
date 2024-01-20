@@ -1,11 +1,14 @@
 import axios from 'axios';
 import {getGroundTracks} from "tle.js";
 
-export const fetchSatelliteData = async() => {
+export const fetchSatelliteData = async(nb_windows) => {
     try {
         const response = await axios.get('http://127.0.0.1:8000/iss/position');
         var data = response.data;
-        const responseIllum = await axios.get('http://127.0.0.1:8000/iss/illumination');
+        const url = nb_windows
+            ? `http://127.0.0.1:8000/iss/illumination?limit=${nb_windows}`
+            : 'http://127.0.0.1:8000/iss/illumination';
+        const responseIllum = await axios.get(url);
         const illuminations = responseIllum.data;
         data = data && illuminations ? {...data, illuminations} : data
         console.log(data);
@@ -14,6 +17,7 @@ export const fetchSatelliteData = async() => {
         console.error(`Error fetching satellite data: ${error}`);
     }
 }
+
 
 export const fetchTLE = async() =>  {
     try {

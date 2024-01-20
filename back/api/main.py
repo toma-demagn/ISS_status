@@ -34,9 +34,13 @@ iss_status = {}
 
 @app.get("/iss/illumination")
 async def get_illumination(limit: int = Query(ILLUMINATION_TIME_WINDOWS_LIMIT)):
-    # returning the last illumination times
-    return (illuminations_time_windows[-limit:] +
-            ([(window_start, window_end)] if (window_end - window_start).total_seconds() > 0 else []))
+    windows = illuminations_time_windows + ([(window_start, window_end)] if (window_end - window_start).total_seconds() > 0 else [])
+    # returning the last limit illumination times
+    if limit == 0:
+        # in the case limit = 0, windows[-limit:] would return the entire list
+        return []
+    else:
+        return windows[-limit:]
 
 
 @app.get("/iss/position")
