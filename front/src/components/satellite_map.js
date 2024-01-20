@@ -3,6 +3,7 @@ import React, {useState} from 'react';
 
 import markerImageMoon from '../assets/iss_moon.png';
 import markerImageSun from '../assets/iss_sun.png';
+import {formatIllumination} from "../utils/functions";
 
 const TILE_SIZE = 256;
 const ISS_ORBIT_INCLINATION_DEG = 51.6
@@ -14,11 +15,6 @@ const {REACT_APP_MAPBOX_ACCESS_TOKEN} = process.env;
 // Mapbox provider function
 function mapboxProvider(x, y, z, dpr) {
     return `https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/${z}/${x}/${y}${dpr >= 2 ? '@2x' : ''}?access_token=${REACT_APP_MAPBOX_ACCESS_TOKEN}`;
-}
-
-function convertTimestamp(timestamp) {
-    const date = new Date(timestamp * 1000);
-    return date.toLocaleString();
 }
 
 function SatelliteMap({data}) {
@@ -85,17 +81,26 @@ function SatelliteMap({data}) {
             {showPopup && (
                 <Overlay anchor={[latitude, longitude]} offset={[120, 79]}>
                     <div style={{background: 'white', borderRadius: '10px', padding: '10px'}}>
-                        {illuminations && illuminations.length > 0 ? (
-                            <>
-                                <h2>{`Last ${illuminations.length} illuminations:`}</h2>
-                                <pre>{illuminations.map(convertTimestamp).join('\n')}</pre>
-                            </>
-                        ) : (
-                            <p>No illuminations registered yet</p>
+                        {showPopup && (
+                            <Overlay anchor={[latitude, longitude]} offset={[120, 79]}>
+                                <div style={{background: 'white', borderRadius: '10px', padding: '10px'}}>
+                                    {illuminations && illuminations.length > 0 ? (
+                                        <>
+                                            <h2>{`Last ${illuminations.length} illuminations:`}</h2>
+                                            {illuminations.map((illumination, index) => (
+                                                <pre key={index}>{formatIllumination(illumination)}</pre>
+                                            ))}
+                                        </>
+                                    ) : (
+                                        <p>No illuminations registered yet</p>
+                                    )}
+                                </div>
+                            </Overlay>
                         )}
                     </div>
                 </Overlay>
             )}
+
 
         </Map>
     );

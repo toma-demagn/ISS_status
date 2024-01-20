@@ -36,3 +36,22 @@ export const fetchTLE = async() =>  {
         console.error(`Error fetching satellite data: ${error}`);
     }
 }
+
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
+}
+
+export function formatIllumination(illumination) {
+    const start = new Date(illumination[0]);
+    const end = new Date(illumination[1]);
+    let timeWindow = '';
+    if (start.toDateString() === end.toDateString()) {
+        // If the start and end are on the same day, show only the time
+        timeWindow = `${start.toLocaleTimeString()} - ${end.toLocaleTimeString()}`;
+    } else {
+        // If the start and end are on different days, show the full date and time
+        timeWindow = `${formatDate(illumination[0])} - ${formatDate(illumination[1])}`;
+    }
+    return timeWindow;
+}
