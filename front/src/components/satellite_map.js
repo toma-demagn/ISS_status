@@ -29,7 +29,8 @@ function SatelliteMap({data}) {
     latitude = latitude || 0;
     longitude = longitude || 0;
     const isIlluminated = data?.is_illuminated;
-    const pathImage = isIlluminated ? markerImageMoon : markerImageSun;
+    const pathImage = isIlluminated ? markerImageSun : markerImageMoon;
+    console.log(data, "illum", isIlluminated)
     const [showPopup, setShowPopup] = useState(false);
     const TlEData = data?.TLEData;
     // The map function is used to reverse lats and lngs
