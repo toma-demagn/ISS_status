@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import queryString from 'query-string';
 import './App.css';
 import SatelliteMap from './components/satellite_map';
 import {fetchSatelliteData, fetchTLE} from "./utils/functions";
@@ -8,12 +9,17 @@ function App() {
     const [TLEData, setTLEData] = useState(null);
 
     useEffect(() => {
+        // Parse the query parameters from the URL
+        const params = queryString.parse(window.location.search);
+        // Get the nb_windows parameter
+        const nbWindows = params.nb_windows;
+
         // Fetch satellite data immediately and update state
-        fetchSatelliteData().then(setData);
+        fetchSatelliteData(nbWindows).then(setData);
 
         // Set up interval to fetch satellite data every 10 seconds
         const intervalId = setInterval(() => {
-            fetchSatelliteData().then(setData);
+            fetchSatelliteData(nbWindows).then(setData);
         }, 10000); // 10000 milliseconds
 
         // Clear interval on component unmount
