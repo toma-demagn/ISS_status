@@ -3,7 +3,7 @@ from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 import requests
 from apscheduler.schedulers.background import BackgroundScheduler
-from utils.logger import log
+from .utils.logger import log
 
 app = FastAPI()
 
