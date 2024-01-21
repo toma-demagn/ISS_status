@@ -28,7 +28,6 @@ export const fetchTLE = async() =>  {
         const line2 = tle.line2;
 
         const tleStr = `${header}\n${line1}\n${line2}`;
-
         const threeOrbitsArr = await getGroundTracks({
             tle: tleStr,
             startTimeMS: tle.timestamp*1000,
