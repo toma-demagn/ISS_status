@@ -19,6 +19,8 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
+    "docker-build": "docker build -t iss-status-front .",
+    "docker-run": "docker run --rm -p 3000:3000 -v $(pwd)/app iss-status-front",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",

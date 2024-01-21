@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import requests
 from apscheduler.schedulers.background import BackgroundScheduler
 from .utils.logger import log
+from pytz import utc
 
 app = FastAPI()
 
@@ -79,6 +80,6 @@ def fetch_and_track():
         track_illumination(result['visibility'], result['timestamp'])
 
 
-scheduler = BackgroundScheduler()
+scheduler = BackgroundScheduler(timezone=utc)
 scheduler.add_job(fetch_and_track, 'interval', seconds=20)
 scheduler.start()
