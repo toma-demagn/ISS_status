@@ -33,14 +33,21 @@ function App() {
         // Set up interval to fetch TLE data every hour
         const TLEIntervalId = setInterval(() => {
             fetchTLE().then(setTLEData);
-        }, 3600000); // 3600000 milliseconds
+        }, 20000); // 3600000 milliseconds
 
         // Clear interval on component unmount
         return () => clearInterval(TLEIntervalId);
     }, []);
 
     // Merge TLEData into data
-    const mergedData = data && TLEData ? {...data, TLEData} : data;
+    let mergedData;
+    if (data && TLEData) {
+        mergedData = {...data, TLEData};
+    } else if (!data && TLEData) {
+        mergedData = {TLEData};
+    } else {
+        mergedData = data;
+    }
 
     return (
         <div className="App">

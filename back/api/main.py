@@ -68,13 +68,12 @@ def register_iss_status(iss_data):
         iss_status['is_illuminated'] = iss_data.get('visibility') == 'daylight'
 
 
-@log
 def fetch_iss_data():
     # Make a request to the external API
     iss_data = requests.get('https://api.wheretheiss.at/v1/satellites/25544').json()
     return iss_data
 
-
+@log
 def fetch_and_track():
     result = fetch_iss_data()
     register_iss_status(result)
