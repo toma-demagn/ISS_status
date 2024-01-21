@@ -3,7 +3,7 @@ from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 import requests
 from apscheduler.schedulers.background import BackgroundScheduler
-from .utils.logger import log
+from utils.logger import log
 
 app = FastAPI()
 
@@ -82,5 +82,5 @@ def fetch_and_track():
 
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(fetch_iss_data, 'interval', seconds=120)
+scheduler.add_job(fetch_and_track, 'interval', seconds=20)
 scheduler.start()
