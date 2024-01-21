@@ -1,7 +1,8 @@
-from freezegun import freeze_time
+import os
 import json
 import pytest
 from .context import main
+from freezegun import freeze_time
 
 # dictionaries mapping line numbers to fixed datetimes
 fixed_now_values = {
@@ -25,14 +26,19 @@ fixed_now_values_missing = {
     138: "2024-01-15 15:00:00",
 }
 
+# getting the data directory's path
+dir_path = os.path.dirname(os.path.realpath(__file__))
+data_path = os.path.join(dir_path, 'data')
+
 
 @pytest.fixture(autouse=True)
 def reset_illuminations(monkeypatch):
     monkeypatch.setattr(main, 'illuminations_time_windows', [])
 
-
 def test_track_illumination_on_whole_file():
-    with open('tests/data/iss_data.txt', 'r') as file:
+    file_path = os.path.join(data_path, 'iss_data.txt')
+
+    with open(file_path, 'r') as file:
         for line_number, line in enumerate(file, start=1):
             with freeze_time(fixed_now_values.get(line_number, "2024-01-15 12:00:00")):
                 main.track_illumination(json.loads(line))
@@ -40,9 +46,10 @@ def test_track_illumination_on_whole_file():
     assert main.illuminations_time_windows == [("2024-01-15T12:00:00", "2024-01-15T13:00:00"),
                                                ("2024-01-15T14:00:00", "2024-01-15T15:00:00")]
 
-
 def test_track_illumination_starting_during_daylight():
-    with open('tests/data/iss_data_daylight_start.txt', 'r') as file:
+    file_path = os.path.join(data_path, 'iss_data_daylight_start.txt')
+
+    with open(file_path, 'r') as file:
         for line_number, line in enumerate(file, start=1):
             with freeze_time(fixed_now_values_daylight.get(line_number, "2024-01-15 12:00:00")):
                 main.track_illumination(json.loads(line))
@@ -50,9 +57,10 @@ def test_track_illumination_starting_during_daylight():
     assert main.illuminations_time_windows == [("2024-01-15T12:00:00", "2024-01-15T13:00:00"),
                                                ("2024-01-15T14:00:00", "2024-01-15T15:00:00")]
 
-
 def test_track_illumination_missing_values():
-    with open('tests/data/iss_data_missing_values.txt', 'r') as file:
+    file_path = os.path.join(data_path, 'iss_data_missing_values.txt')
+
+    with open(file_path, 'r') as file:
         for line_number, line in enumerate(file, start=1):
             with freeze_time(fixed_now_values_missing.get(line_number, "2024-01-15 12:00:00")):
                 main.track_illumination(json.loads(line))
