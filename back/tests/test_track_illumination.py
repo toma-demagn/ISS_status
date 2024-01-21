@@ -26,6 +26,12 @@ fixed_now_values_missing = {
     138: "2024-01-15 15:00:00",
 }
 
+fixed_now_values_same_date = {
+    65: "2024-01-15 12:00:00",
+    66: "2024-01-15 12:00:00",
+    85: "2024-01-15 14:00:00",
+}
+
 # getting the data directory's path
 dir_path = os.path.dirname(os.path.realpath(__file__))
 data_path = os.path.join(dir_path, 'data')
@@ -40,7 +46,7 @@ def test_track_illumination_on_whole_file():
 
     with open(file_path, 'r') as file:
         for line_number, line in enumerate(file, start=1):
-            with freeze_time(fixed_now_values.get(line_number, "2024-01-15 12:00:00")):
+            with freeze_time(fixed_now_values.get(line_number, "2024-01-15 11:00:00")):
                 main.track_illumination(json.loads(line))
 
     assert main.illuminations_time_windows == [("2024-01-15T12:00:00", "2024-01-15T13:00:00"),
@@ -51,7 +57,7 @@ def test_track_illumination_starting_during_daylight():
 
     with open(file_path, 'r') as file:
         for line_number, line in enumerate(file, start=1):
-            with freeze_time(fixed_now_values_daylight.get(line_number, "2024-01-15 12:00:00")):
+            with freeze_time(fixed_now_values_daylight.get(line_number, "2024-01-15 11:00:00")):
                 main.track_illumination(json.loads(line))
 
     assert main.illuminations_time_windows == [("2024-01-15T12:00:00", "2024-01-15T13:00:00"),
@@ -62,8 +68,19 @@ def test_track_illumination_missing_values():
 
     with open(file_path, 'r') as file:
         for line_number, line in enumerate(file, start=1):
-            with freeze_time(fixed_now_values_missing.get(line_number, "2024-01-15 12:00:00")):
+            with freeze_time(fixed_now_values_missing.get(line_number, "2024-01-15 11:00:00")):
                 main.track_illumination(json.loads(line))
 
     assert main.illuminations_time_windows == [("2024-01-15T12:00:00", "2024-01-15T13:00:00"),
                                                ("2024-01-15T14:00:00", "2024-01-15T15:00:00")]
+
+
+def test_track_illumination_same_date():
+    file_path = os.path.join(data_path, 'iss_data_missing_values.txt')
+
+    with open(file_path, 'r') as file:
+        for line_number, line in enumerate(file, start=1):
+            with freeze_time(fixed_now_values_same_date.get(line_number, "2024-01-15 11:00:00")):
+                main.track_illumination(json.loads(line))
+
+    assert main.illuminations_time_windows == []
