@@ -34,7 +34,7 @@ export const fetchTLE = async() =>  {
         });
 
         // getting the current time to store the last call's timestamp
-        return {"coordinates": threeOrbitsArr[1], "next_orb": threeOrbitsArr[2], "timestamp": Date.now()};
+        return {"coordinates": threeOrbitsArr[1], "next_orb": threeOrbitsArr[2], "updated_at": Date.now()};
     } catch (error) {
         console.error(`Error fetching satellite data: ${error}`);
     }
