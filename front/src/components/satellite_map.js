@@ -33,10 +33,17 @@ function SatelliteMap({data}) {
     const pathImage = isIlluminated ? markerImageSun : markerImageMoon;
     const [showPopup, setShowPopup] = useState(false);
 
-    const TlEData = data?.TLEData;
+    const TLEData = data?.TLEData;
 
     // reversing lng, and lat in the array
-    const coordinates = TlEData ? TlEData.coordinates.map(([lng, lat]) => [lat, lng]) : [];
+    let coordinates = TLEData ? TLEData.coordinates.map(([lng, lat]) => [lat, lng]) : [];
+
+    // when the ISS crossed the +180 longitude, we take the second orbit retrived in the call to fetchTLEData
+    // otherwise, the position of the ISS appeared out of the orbit line until next fetchTLEData call
+    if (longitude < - 141 && TLEData.timestamp - Date.now() > 180000) {
+        console.log("Using TLE of the next orbit")
+        coordinates = TLEData ? TLEData.next_orb.map(([lng, lat]) => [lat, lng]) : [];
+    }
 
     // adjusting the zoomValue according to screeWidth to TILE_SIZE ratio, with 2^zoomValue = screenWidth/TILE_SIZE
     // see https://evilmartians.com/chronicles/how-to-build-a-better-react-map-with-pigeon-maps-and-mapbox for ref
@@ -61,7 +68,7 @@ function SatelliteMap({data}) {
             />
 
 
-            {TlEData && (
+            {TLEData && (
                 <GeoJson
                     data={{
                         type: 'FeatureCollection',
