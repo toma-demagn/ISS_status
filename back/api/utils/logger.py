@@ -23,3 +23,10 @@ def log(func):
         logger.info(f'{func.__name__} is called')
         return func(*args, **kwargs)
     return wrapper
+
+def debug(func):
+    logger = get_logger(func.__name__)
+    def wrapper(*args, **kwargs):
+        logger.debug(f'{func.__name__} is called')
+        return func(*args, **kwargs)
+    return wrapper
