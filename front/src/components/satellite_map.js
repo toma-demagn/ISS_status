@@ -56,85 +56,78 @@ function SatelliteMap({data}) {
     const nightAreaGeoJson = new GeoJSONTerminator();
 
     return (
-        <Map height={screenWidth * HEIGHT_RATIO}
-             width={screenWidth}
-             defaultCenter={[0, 0]}
-             defaultZoom={zoomValue}
-             provider={mapboxProvider}>
+        <div className="map h-screen w-screen">
+            <Map className="h-full w-full"
+                 defaultCenter={[0, 0]}
+                 defaultZoom={zoomValue}
+                 provider={mapboxProvider}>
 
-            <GeoJson
-                data={nightAreaGeoJson}
-                styleCallback={() => ({ fill: 'rgba(0, 0, 0, 0.5)' })}
-            />
-
-
-            {TLEData && (
                 <GeoJson
-                    data={{
-                        type: 'FeatureCollection',
-                        features: [{
-                            type: 'Feature',
-                            geometry: {
-                                type: 'LineString',
-                                coordinates,
-                            },
-                            properties: {
-                                prop0: 'value0',
-                                prop1: 0.0,
-                            },
-                        },
-                        ],
-                    }}
-                    styleCallback={(feature, hover) => {
-                        if (feature.geometry.type === 'LineString') {
-                            return {strokeWidth: '2', stroke: 'black'}
-                        }
-                        return {fill: '#d4e6ec99', strokeWidth: '1', stroke: 'white', r: '20'}
-                    }}
+                    data={nightAreaGeoJson}
+                    styleCallback={() => ({ fill: 'rgba(0, 0, 0, 0.5)' })}
                 />
-            )}
 
-            {/*marker to show popup on mouse over*/}
-            <Marker
-                anchor={[latitude, longitude]}
-                onMouseOver={() => setShowPopup(true)}
-                onMouseOut={() => setShowPopup(false)}
-                width={window.innerWidth * 0.08}
-                height={window.innerHeight * 0.08}
-            />
-            {/*marker with the image of the iss at the right position*/}
-            <Marker
-                anchor={[latitude, longitude]}
-            >
-                <img src={pathImage} alt="marker" className="imageISS"/>
-            </Marker>
+                {TLEData && (
+                    <GeoJson
+                        data={{
+                            type: 'FeatureCollection',
+                            features: [{
+                                type: 'Feature',
+                                geometry: {
+                                    type: 'LineString',
+                                    coordinates,
+                                },
+                                properties: {
+                                    prop0: 'value0',
+                                    prop1: 0.0,
+                                },
+                            },
+                            ],
+                        }}
+                        styleCallback={(feature, hover) => {
+                            if (feature.geometry.type === 'LineString') {
+                                return {strokeWidth: '2', stroke: 'black'}
+                            }
+                            return {fill: '#d4e6ec99', strokeWidth: '1', stroke: 'white', r: '20'}
+                        }}
+                    />
+                )}
 
-            {/*creating the popup with formatted illumination string*/}
-            {showPopup && (
-                <Overlay anchor={[latitude, longitude]} offset={[120, 79]}>
-                    <div style={{background: 'white', borderRadius: '10px', padding: '10px'}}>
-                        {showPopup && (
-                            <Overlay anchor={[latitude, longitude]} offset={[120, 79]}>
-                                <div style={{background: 'white', borderRadius: '10px', padding: '10px'}}>
-                                    {illuminations && illuminations.length > 0 ? (
-                                        <>
-                                            <h2>{`Last ${illuminations.length} illuminations:`}</h2>
-                                            {illuminations.map((illumination, index) => (
-                                                <pre key={index}>{formatIllumination(illumination)}</pre>
-                                            ))}
-                                        </>
-                                    ) : (
-                                        <p>No illuminations registered yet</p>
-                                    )}
-                                </div>
-                            </Overlay>
-                        )}
-                    </div>
-                </Overlay>
-            )}
+                {/*marker to show popup on mouse over*/}
+                <Marker
+                    anchor={[latitude, longitude]}
+                    onMouseOver={() => setShowPopup(true)}
+                    onMouseOut={() => setShowPopup(false)}
+                    width={window.innerWidth * 0.08}
+                    height={window.innerHeight * 0.08}
+                />
+                {/*marker with the image of the iss at the right position*/}
+                <Marker
+                    anchor={[latitude, longitude]}
+                >
+                    <img src={pathImage} alt="marker" className="imageISS block mx-auto transform translate-x-[-950%] translate-y-50 w-5 pointer-events-none"/>
+                </Marker>
 
+                {/*creating the popup with formatted illumination string*/}
+                {showPopup && (
+                    <Overlay anchor={[latitude, longitude]} offset={[120, 79]}>
+                        <div className="bg-white rounded p-2">
+                            {illuminations && illuminations.length > 0 ? (
+                                <>
+                                    <h2 className="text-lg font-bold">{`Last ${illuminations.length} illuminations:`}</h2>
+                                    {illuminations.map((illumination, index) => (
+                                        <pre key={index} className="text-sm">{formatIllumination(illumination)}</pre>
+                                    ))}
+                                </>
+                            ) : (
+                                <p className="text-sm">No illuminations registered yet</p>
+                            )}
+                        </div>
+                    </Overlay>
+                )}
 
-        </Map>
+            </Map>
+        </div>
     );
 }
 

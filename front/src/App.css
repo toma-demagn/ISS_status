@@ -1,10 +1,9 @@
 .App {
-  text-align: center;
+  @apply text-center;
 }
 
 .App-logo {
-  height: 40vmin;
-  pointer-events: none;
+  @apply h-40 pointer-events-none animate-spin-slow;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -14,33 +13,20 @@
 }
 
 .App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  @apply bg-gray-800 min-h-screen flex flex-col items-center justify-center text-2xl text-white;
 }
 
 .App-link {
-  color: #61dafb;
+  @apply text-blue-300;
 }
 
 .imageISS {
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-  transform: translateX(-950%) translateY(50%);
-  width: 5%;
-  pointer-events: none;
+  @apply block mx-auto transform -translate-x-950 translate-y-50 w-5 pointer-events-none;
 }
 
 .pigeon-marker {
   border: none !important;
 }
-
 
 @keyframes App-logo-spin {
   from {
@@ -49,6 +35,4 @@
   to {
     transform: rotate(360deg);
   }
-
-
 }
