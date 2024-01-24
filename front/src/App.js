@@ -4,42 +4,46 @@ import './App.css';
 import SatelliteMap from './components/satellite_map';
 import {fetchSatelliteData, fetchTLE} from "./utils/functions";
 
+// loading .env variables
+const { REACT_APP_SATELLITE_FETCH_RATE, REACT_APP_TLE_FETCH_RATE } = process.env;
+
 function App() {
     const [data, setData] = useState(null);
     const [TLEData, setTLEData] = useState(null);
 
     useEffect(() => {
-        // Parse the query parameters from the URL
+
+        // getting the nb_windows parameter
         const params = queryString.parse(window.location.search);
-        // Get the nb_windows parameter
         const nbWindows = params.nb_windows;
 
-        // Fetch satellite data immediately and update state
+        // fetching satellite data immediately and update state
         fetchSatelliteData(nbWindows).then(setData);
 
-        // Set up interval to fetch satellite data every 10 seconds
+        // setting up interval to fetch satellite data regularly, according to the .env value
         const intervalId = setInterval(() => {
             fetchSatelliteData(nbWindows).then(setData);
-        }, 10000); // 10000 milliseconds
+        }, REACT_APP_SATELLITE_FETCH_RATE);
 
-        // Clear interval on component unmount
+        // clearing interval on component unmount
         return () => clearInterval(intervalId);
     }, []);
 
+    // the following is for fetching TLE data of the ISS in order to draw its trajectory on the map
     useEffect(() => {
-        // Fetch TLE data immediately and update state
+        // fetching TLE data immediately and update state
         fetchTLE().then(setTLEData);
 
-        // Set up interval to fetch TLE data every hour
+        // regularly fetching TLE data at the rate given in .env
         const TLEIntervalId = setInterval(() => {
             fetchTLE().then(setTLEData);
-        }, 20000); // 3600000 milliseconds
+        }, REACT_APP_TLE_FETCH_RATE);
 
-        // Clear interval on component unmount
+        // clearing interval on component unmount
         return () => clearInterval(TLEIntervalId);
     }, []);
 
-    // Merge TLEData into data
+    // merging TLEData and data into single object
     let mergedData;
     if (data && TLEData) {
         mergedData = {...data, TLEData};
