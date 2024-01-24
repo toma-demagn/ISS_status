@@ -43,41 +43,40 @@ async def get_position():
     return iss_status
 
 
-def track_illumination(iss_data):
-    visibility = iss_data.get('visibility', None)
-    curr_illumination_state = False if visibility is None else visibility == 'daylight'
+def track_illumination(visibility, timestamp):
+    curr_illumination_state = visibility == 'daylight'
     global window_start, window_end
     if window_start == datetime.min and curr_illumination_state:
-        window_start = datetime.now()
+        window_start = datetime.fromtimestamp(timestamp)
 
     if curr_illumination_state:
-        window_end = datetime.now()
+        window_end = datetime.fromtimestamp(timestamp)
 
-    # total_seconds is used because seconds would give only the seconds part of the date diff
     if (window_end - window_start).total_seconds() > 0 and not curr_illumination_state:
         illuminations_time_windows.append((window_start.isoformat(), window_end.isoformat()))
+
+    if not curr_illumination_state:
         window_start, window_end = datetime.min, datetime.min
 
 
-def register_iss_status(iss_data):
-    # update the fields if they are all in result
-    if (iss_data.get('latitude') is not None and iss_data.get('longitude') is not None and
-            iss_data.get('visibility') is not None):
-        iss_status['latitude'] = iss_data.get('latitude')
-        iss_status['longitude'] = iss_data.get('longitude')
-        iss_status['is_illuminated'] = iss_data.get('visibility') == 'daylight'
+def register_iss_status(latitude, longitude, visibility):
+    iss_status['latitude'] = latitude
+    iss_status['longitude'] = longitude
+    iss_status['is_illuminated'] = visibility == 'daylight'
 
 
 def fetch_iss_data():
-    # Make a request to the external API
     iss_data = requests.get('https://api.wheretheiss.at/v1/satellites/25544').json()
     return iss_data
+
 
 @log
 def fetch_and_track():
     result = fetch_iss_data()
-    register_iss_status(result)
-    track_illumination(result)
+    if isinstance(result.get('latitude'), float) and isinstance(result.get('longitude'), float) and isinstance(
+            result.get('timestamp'), int) and isinstance(result.get('visibility'), str):
+        register_iss_status(result['latitude'], result['longitude'], result['visibility'])
+        track_illumination(result['visibility'], result['timestamp'])
 
 
 scheduler = BackgroundScheduler()
