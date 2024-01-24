@@ -3,7 +3,8 @@ from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 import requests
 from apscheduler.schedulers.background import BackgroundScheduler
-from .utils.logger import log, debug
+from .utils.logger import log
+from pytz import utc
 
 app = FastAPI()
 
@@ -70,7 +71,7 @@ def fetch_iss_data():
     return iss_data
 
 
-@debug
+@log
 def fetch_and_track():
     result = fetch_iss_data()
     if isinstance(result.get('latitude'), float) and isinstance(result.get('longitude'), float) and isinstance(
@@ -79,6 +80,6 @@ def fetch_and_track():
         track_illumination(result['visibility'], result['timestamp'])
 
 
-scheduler = BackgroundScheduler()
+scheduler = BackgroundScheduler(timezone=utc)
 scheduler.add_job(fetch_and_track, 'interval', seconds=20)
 scheduler.start()
