@@ -7,14 +7,14 @@ import markerImageMoon from '../assets/iss_moon.png';
 import markerImageSun from '../assets/iss_sun.png';
 import {formatIllumination} from "../utils/functions";
 
+// constants to help draw the map
 const TILE_SIZE = 256;
 const ISS_ORBIT_INCLINATION_DEG = 51.6
+// this HEIGHT_RATIO takes into accound the orbit inclination in order to crop out some area that the ISS doesn't cover
 const HEIGHT_RATIO = ISS_ORBIT_INCLINATION_DEG / 90.0;
 
-// Mapbox access token
 const {REACT_APP_MAPBOX_ACCESS_TOKEN} = process.env;
 
-// Mapbox provider function
 function mapboxProvider(x, y, z, dpr) {
     return `https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/${z}/${x}/${y}${dpr >= 2 ? '@2x' : ''}?access_token=${REACT_APP_MAPBOX_ACCESS_TOKEN}`;
 }
@@ -23,20 +23,38 @@ function SatelliteMap({data}) {
     let latitude = data?.latitude;
     let longitude = data?.longitude;
 
-    // If latitude and longitude are not set, default them to 0
+    // placing ISS at null island if lat,lng are not set
     latitude = latitude || 0;
     longitude = longitude || 0;
+
     const isIlluminated = data?.is_illuminated;
+
+    // setting the image accoring to the illumination status of the ISS
     const pathImage = isIlluminated ? markerImageSun : markerImageMoon;
     const [showPopup, setShowPopup] = useState(false);
-    const TlEData = data?.TLEData;
-    // The map function is used to reverse lats and lngs
-    const coordinates = TlEData ? TlEData.coordinates.map(([lng, lat]) => [lat, lng]) : [];
+
+    const TLEData = data?.TLEData;
+
+    // reversing lng, and lat in the array
+    let coordinates = TLEData ? TLEData.coordinates.map(([lng, lat]) => [lat, lng]) : [];
+
+    const updated_at = TLEData?.updated_at || Date.now();
+    // when the ISS crossed the +180 longitude, we take the second orbit retrived in the call to fetchTLEData
+    // otherwise, the position of the ISS appeared out of the orbit line until next fetchTLEData call
+    if (longitude < - 141 && Date.now() - updated_at > 1800000) {
+        console.log("Using TLE of the next orbit")
+        coordinates = TLEData ? TLEData.next_orb.map(([lng, lat]) => [lat, lng]) : [];
+    }
+
+    // adjusting the zoomValue according to screeWidth to TILE_SIZE ratio, with 2^zoomValue = screenWidth/TILE_SIZE
+    // see https://evilmartians.com/chronicles/how-to-build-a-better-react-map-with-pigeon-maps-and-mapbox for ref
     const screenWidth = window.innerWidth;
     const zoomValue = Math.log2(screenWidth / TILE_SIZE);
+
     const illuminations = data?.illuminations;
 
-    var nightAreaGeoJson = new GeoJSONTerminator();
+    // getting the night area for adding shade to the map
+    const nightAreaGeoJson = new GeoJSONTerminator();
 
     return (
         <Map height={screenWidth * HEIGHT_RATIO}
@@ -51,7 +69,7 @@ function SatelliteMap({data}) {
             />
 
 
-            {TlEData && (
+            {TLEData && (
                 <GeoJson
                     data={{
                         type: 'FeatureCollection',
@@ -76,6 +94,8 @@ function SatelliteMap({data}) {
                     }}
                 />
             )}
+
+            {/*marker to show popup on mouse over*/}
             <Marker
                 anchor={[latitude, longitude]}
                 onMouseOver={() => setShowPopup(true)}
@@ -83,12 +103,14 @@ function SatelliteMap({data}) {
                 width={window.innerWidth * 0.08}
                 height={window.innerHeight * 0.08}
             />
+            {/*marker with the image of the iss at the right position*/}
             <Marker
                 anchor={[latitude, longitude]}
             >
                 <img src={pathImage} alt="marker" className="imageISS"/>
             </Marker>
 
+            {/*creating the popup with formatted illumination string*/}
             {showPopup && (
                 <Overlay anchor={[latitude, longitude]} offset={[120, 79]}>
                     <div style={{background: 'white', borderRadius: '10px', padding: '10px'}}>

@@ -26,19 +26,20 @@ export const fetchTLE = async() =>  {
         const header = tle.header;
         const line1 = tle.line1;
         const line2 = tle.line2;
-
         const tleStr = `${header}\n${line1}\n${line2}`;
         const threeOrbitsArr = await getGroundTracks({
             tle: tleStr,
-            startTimeMS: tle.timestamp*1000,
             stepMS: 1000,
             isLngLatFormat: false,
         });
-        return {"coordinates": threeOrbitsArr[1]};
+
+        // getting the current time to store the last call's timestamp
+        return {"coordinates": threeOrbitsArr[1], "next_orb": threeOrbitsArr[2], "updated_at": Date.now()};
     } catch (error) {
         console.error(`Error fetching satellite data: ${error}`);
     }
 }
+
 
 function formatDate(dateString) {
     const date = new Date(dateString);
