@@ -3,7 +3,7 @@ from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 import requests
 from apscheduler.schedulers.background import BackgroundScheduler
-from .utils.logger import log
+from .utils.logger import log, debug
 
 app = FastAPI()
 
@@ -70,7 +70,7 @@ def fetch_iss_data():
     return iss_data
 
 
-@log
+@debug
 def fetch_and_track():
     result = fetch_iss_data()
     if isinstance(result.get('latitude'), float) and isinstance(result.get('longitude'), float) and isinstance(
