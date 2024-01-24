@@ -13,6 +13,8 @@ const ISS_ORBIT_INCLINATION_DEG = 51.6
 // this HEIGHT_RATIO takes into accound the orbit inclination in order to crop out some area that the ISS doesn't cover
 const HEIGHT_RATIO = ISS_ORBIT_INCLINATION_DEG / 90.0;
 
+const ISS_ORBIT_TIME_MS = 324000000;
+
 const {REACT_APP_MAPBOX_ACCESS_TOKEN} = process.env;
 
 function mapboxProvider(x, y, z, dpr) {
@@ -41,7 +43,7 @@ function SatelliteMap({data}) {
     const updated_at = TLEData?.updated_at || Date.now();
     // when the ISS crossed the +180 longitude, we take the second orbit retrived in the call to fetchTLEData
     // otherwise, the position of the ISS appeared out of the orbit line until next fetchTLEData call
-    if (longitude < - 141 && Date.now() - updated_at > 1800000) {
+    if (longitude < 0 && Date.now() - updated_at > ISS_ORBIT_TIME_MS/2) {
         console.log("Using TLE of the next orbit")
         coordinates = TLEData ? TLEData.next_orb.map(([lng, lat]) => [lat, lng]) : [];
     }
