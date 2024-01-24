@@ -38,9 +38,10 @@ function SatelliteMap({data}) {
     // reversing lng, and lat in the array
     let coordinates = TLEData ? TLEData.coordinates.map(([lng, lat]) => [lat, lng]) : [];
 
+    const updated_at = TLEData?.updated_at || Date.now();
     // when the ISS crossed the +180 longitude, we take the second orbit retrived in the call to fetchTLEData
     // otherwise, the position of the ISS appeared out of the orbit line until next fetchTLEData call
-    if (longitude < - 141 && TLEData.timestamp - Date.now() > 6000) {
+    if (longitude < - 141 && Date.now() - updated_at > 1800000) {
         console.log("Using TLE of the next orbit")
         coordinates = TLEData ? TLEData.next_orb.map(([lng, lat]) => [lat, lng]) : [];
     }
