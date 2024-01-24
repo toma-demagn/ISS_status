@@ -3,7 +3,8 @@ starlette==0.14.2
 requests==2.26.0
 apscheduler==3.8.1
 pytest==7.0.1
-freezegun==1.1.0
 uvicorn==0.15.0
 pytz==2021.1
+pytest-cov
+pytest-mock
 
