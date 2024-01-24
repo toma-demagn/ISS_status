@@ -1,5 +1,5 @@
 import pytest
-from .context import main
+from .context import main, MAIN_PATH
 
 
 @pytest.fixture(autouse=True)
@@ -11,29 +11,37 @@ def reset_iss_status(monkeypatch):
     })
 
 
-def test_register_iss_status():
-    # calling register_iss_status with a new dictionary
-    main.register_iss_status({
-        'latitude': 50.0,
-        'longitude': 0.3,
-        'visibility': 'daylight'
-    })
+valid_mock_data = {'latitude': 3.5488158682935,
+                   'longitude': -26.179545616384,
+                   'visibility': 'daylight',
+                   'timestamp': 1705766569
+                   }
 
-    # Assert that iss_status was not updated
+invalid_mock_data = {'latitude': 3.5488158682935,
+                     'visibility': 'daylight',
+                     'timestamp': 1705766569
+                     }
+
+
+def test_register_iss_status(mocker):
+    mocker.patch(f'{MAIN_PATH}.fetch_iss_data', return_value=valid_mock_data)
+
+    # calling register_iss_status with a new dictionary
+    main.fetch_and_track()
+
+    # Assert that iss_status was updated
     assert main.iss_status == {
-        'latitude': 50.0,
-        'longitude': 0.3,
+        'latitude': 3.5488158682935,
+        'longitude': -26.179545616384,
         'is_illuminated': True
     }
 
 
-def test_register_iss_status_with_missing_fields():
+def test_register_iss_status_with_missing_fields(mocker):
+    mocker.patch(f'{MAIN_PATH}.fetch_iss_data', return_value=invalid_mock_data)
+
     # calling register_iss_status but with a missing field
-    main.register_iss_status({
-        'latitude': 50.0,
-        'longitude': None,
-        'visibility': 'daylight'
-    })
+    main.fetch_and_track()
 
     # Assert that iss_status was not updated
     assert main.iss_status == {

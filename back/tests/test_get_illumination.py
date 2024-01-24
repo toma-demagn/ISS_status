@@ -22,6 +22,7 @@ illuminations_time_windows = [
 ]
 window_start = datetime.fromisoformat("2024-01-16T00:00:00")
 window_end = datetime.fromisoformat("2024-01-16T01:00:00")
+
 DEFAULT_ILLUMINATION_TIME_WINDOWS_LIMIT = 10
 
 
@@ -30,8 +31,6 @@ def mock_data(monkeypatch):
     monkeypatch.setattr(main, 'illuminations_time_windows', illuminations_time_windows)
     monkeypatch.setattr(main, 'window_start', window_start)
     monkeypatch.setattr(main, 'window_end', window_end)
-    monkeypatch.setattr(main, 'DEFAULT_ILLUMINATION_TIME_WINDOWS_LIMIT',
-                        DEFAULT_ILLUMINATION_TIME_WINDOWS_LIMIT)
 
 
 def test_get_illumination_empty():
@@ -84,3 +83,18 @@ def test_get_illumination_same_start_end(mock_data_same_start_end):
 
     assert response.status_code == 200
     assert response.json() == time_window_strings
+
+
+@pytest.fixture
+def no_data(monkeypatch):
+    monkeypatch.setattr(main, 'illuminations_time_windows', [])
+    monkeypatch.setattr(main, 'window_start', datetime.min)
+    monkeypatch.setattr(main, 'window_end', datetime.min)
+    monkeypatch.setattr(main, 'DEFAULT_ILLUMINATION_TIME_WINDOWS_LIMIT',
+                        DEFAULT_ILLUMINATION_TIME_WINDOWS_LIMIT)
+
+
+def test_get_illumination_no_data():
+    response = client.get("/iss/illumination?limit=0")
+    assert response.status_code == 200
+    assert response.json() == []
