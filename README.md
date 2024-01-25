@@ -10,7 +10,7 @@ ISS position and hovering the ISS icon with the mouse reveals the last time wind
 Note : the frontend uses css because of the simplicity of the GUI (no button and very little text), the use of 
 frameworks like Tailwind CSS seemed overkill.
 
-# How to run
+# How to run webapp
 ## Run with docker
 
 With docker running, open a terminal at the root of the project and run :
@@ -31,5 +31,11 @@ uvicorn api.main:app --reload
 ```console
 npm install
 npm start
+```
+# How to run unit tests
+
+Using a bash command line :
+```console
+./run_tests.sh
 ```
 
