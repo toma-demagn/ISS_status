@@ -22,13 +22,13 @@ docker-compose up
 ## Run without docker
 
 ### Run the backend
-`cd` to directory `back` then 
+`cd` to `\back` then:
 ```console
 pip install requirements.txt
 uvicorn api.main:app --reload
 ```
 ### Run the frontend
-`cd` to directory `front` then 
+`cd` to `\front` then: 
 ```console
 npm install
 npm start
@@ -36,7 +36,9 @@ npm start
 # How to run unit tests
 
 Using a bash command line :
+`cd` to `\back` then:
 ```console
+chmod +x run_tests.sh
 ./run_tests.sh
 ```
 
