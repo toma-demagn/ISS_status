@@ -17,7 +17,7 @@ docker-compose up
 ### Run the backend
 `cd` to directory `back` then 
 ```console
-pip install requirements.txt
+pip install -r requirements.txt
 uvicorn api.main:app --reload
 ```
 ### Run the frontend
