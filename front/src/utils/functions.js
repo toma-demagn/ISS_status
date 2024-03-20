@@ -3,11 +3,11 @@ import {getGroundTracks} from "tle.js";
 
 export const fetchSatelliteData = async(nb_windows) => {
     try {
-        const response = await axios.get('http://localhost:8001/iss/position');
+        const response = await axios.get('https://random.outpace.fr/backend/iss/position');
         var data = response.data;
         const url = nb_windows
-            ? `http://localhost:8001/iss/illumination?limit=${nb_windows}`
-            : 'http://localhost:8001/iss/illumination';
+            ? `https://random.outpace.fr/backend/iss/illumination?limit=${nb_windows}`
+            : 'https://random.outpace.fr/backend/iss/illumination';
         const responseIllum = await axios.get(url);
         const illuminations = responseIllum.data;
         data = data && illuminations ? {...data, illuminations} : data
