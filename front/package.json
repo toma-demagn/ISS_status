@@ -8,6 +8,8 @@
     "@testing-library/user-event": "^13.5.0",
     "@webgeodatavore/geojson.terminator": "^1.0.2",
     "axios": "^1.6.5",
+    "buffer": "^6.0.3",
+    "haversine-distance": "^1.2.1",
     "pigeon-maps": "^0.21.3",
     "query-string": "^8.1.0",
     "react": "^18.2.0",
@@ -15,7 +17,11 @@
     "react-leaflet": "^4.2.1",
     "react-scripts": "5.0.1",
     "satellite.js": "^5.0.0",
+    "stream-browserify": "^3.0.0",
+    "stream-http": "^3.2.0",
+    "tle": "^3.0.0",
     "tle.js": "^4.9.0",
+    "tls-browserify": "^0.2.2",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
