@@ -21,6 +21,13 @@ function mapboxProvider(x, y, z, dpr) {
     return `https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/${z}/${x}/${y}${dpr >= 2 ? '@2x' : ''}?access_token=${REACT_APP_MAPBOX_ACCESS_TOKEN}`;
 }
 
+function fixTerminator(nightAreaGeoJson) {
+    const coords = nightAreaGeoJson.features[0].geometry.coordinates[0];
+    coords.splice(0, 1);
+    coords[coords.length - 1][1] = -89;
+    coords[0][1] = -89;
+}
+
 function SatelliteMap({data}) {
     let latitude = data?.latitude;
     let longitude = data?.longitude;
@@ -57,6 +64,7 @@ function SatelliteMap({data}) {
 
     // getting the night area for adding shade to the map
     const nightAreaGeoJson = new GeoJSONTerminator();
+    fixTerminator(nightAreaGeoJson);
 
     return (
         <Map height={screenWidth * HEIGHT_RATIO}
