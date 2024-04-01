@@ -27,6 +27,13 @@ function mapboxProvider(x, y, z, dpr) {
   return `https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/${z}/${x}/${y}${dpr >= 2 ? "@2x" : ""}?access_token=${REACT_APP_MAPBOX_ACCESS_TOKEN}`;
 }
 
+function fixTerminator(nightAreaGeoJson) {
+  const coords = nightAreaGeoJson.features[0].geometry.coordinates[0];
+  coords.splice(0, 1);
+  coords[coords.length - 1][1] = -89;
+  coords[0][1] = -89;
+}
+
 function SatelliteMap({ data }) {
   let latitude = data?.latitude;
   let longitude = data?.longitude;
@@ -81,13 +88,16 @@ function SatelliteMap({ data }) {
         : [];
     }
 
-    // adjusting the zoomValue according to screeWidth to TILE_SIZE ratio, with 2^zoomValue = screenWidth/TILE_SIZE
-    // see https://evilmartians.com/chronicles/how-to-build-a-better-react-map-with-pigeon-maps-and-mapbox for ref
-    const screenWidth = window.innerWidth;
-    const zoomValue = Math.log2(screenWidth / TILE_SIZE);
+  // adjusting the zoomValue according to screeWidth to TILE_SIZE ratio, with 2^zoomValue = screenWidth/TILE_SIZE
+  // see https://evilmartians.com/chronicles/how-to-build-a-better-react-map-with-pigeon-maps-and-mapbox for ref
+  const screenWidth = window.innerWidth;
+  const zoomValue = Math.log2(screenWidth / TILE_SIZE);
 
-    const illuminations = data?.illuminations;
+  const illuminations = data?.illuminations;
 
+  // getting the night area for adding shade to the map
+  const nightAreaGeoJson = new GeoJSONTerminator();
+  fixTerminator(nightAreaGeoJson);
     const aroundCoords = stations.map((station) =>
       generatePoints(station.lat, station.lng, station.rad, 10000).map(
         (point) => [point[1], point[0]],
