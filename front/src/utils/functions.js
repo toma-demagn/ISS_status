@@ -8,11 +8,11 @@ const SECONDS_PER_DAY = 86400;
 const RADIUS = 2500.64; // tan(70 deg) * 408 * 6471 / (6878);
 //const PARIS = {lat: -34.9285, lng: 138.6007, rad:RADIUS};
 //16.3630° S, 12.2548
-const PARIS = {lat: -26.36, lng: 28.25, rad:RADIUS, name:"Paris"};
-const MADRID = {lat: 40.4168, lng: -3.7038, rad:RADIUS, name:"Madrid"};
+const PARIS = {lat: -26.36, lng: 28.25, rad:RADIUS, name:"Paris", color:"rgba(255,0,0)"};
+const MADRID = {lat: 40.4168, lng: -3.7038, rad:RADIUS, name:"Madrid", color:"rgb(183,0,255)"};
 //const KIRIBATI = {lat: 15.2574, lng: -83.7806, rad:RADIUS};
 //35.6764° N, 139.6500° E
-const KIRIBATI = {lat: 36.6764, lng: 139.65, rad:RADIUS, name:"Kiribati"};
+const KIRIBATI = {lat: 36.6764, lng: 139.65, rad:RADIUS, name:"Kiribati", color:"rgb(255,219,0)"};
 export const STATIONS = [PARIS, MADRID, KIRIBATI];
 
 
