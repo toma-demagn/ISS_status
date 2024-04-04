@@ -51,8 +51,12 @@ function App() {
   let vis;
   if (TLEs && issData) {
     let coordinates = TLEs.map((TLE) => TLE.coordinates);
+    let coordinatesExtended = TLEs.map((TLE) => TLE.coordinates.concat(TLE.next_orb));
+    console.log("les coordonnées", coordinates)
+    console.log("les coordonnées étendues", coordinatesExtended)
 
-    vis = computeVis(coordinates, STATIONS);
+    vis = computeVis(coordinatesExtended, STATIONS);
+    console.log("vis", vis)
     issData.name = "ISS";
     const satellites = [issData, { name: "SWOT" }, { name: "SWOM" }];
     const indexDistISS = findClosestIndexDist(coordinates[0], [

@@ -47,6 +47,7 @@ function SatelliteMap({ satellites, passes, TLEs }) {
     satel.longitude,
   ]);
 
+
   const stations = STATIONS;
 
   const isIlluminated = ISS.is_illuminated;
@@ -77,11 +78,10 @@ function SatelliteMap({ satellites, passes, TLEs }) {
       }
     }
 
-    console.log("indices là ", satelIndices)
 
-    // when the ISS crossed the +180 longitude, we take the second orbit retrived in the call to fetchTLEData
+    // when the ISS crossed the +180 longitude, we take the second orbit retrieved in the call to fetchTLEData
     // otherwise, the position of the ISS appeared out of the orbit line until next fetchTLEData call
-    if (distISS > 4000000) {
+    if (distISS > 400000) {
       satelTrajectories[0] = TLEData
         ? TLEData.next_orb
         : [];
@@ -95,7 +95,7 @@ function SatelliteMap({ satellites, passes, TLEs }) {
     const illuminations = ISS.illuminations;
 
     const aroundCoords = stations.map((station) =>
-      generatePoints(station.lat, station.lng, station.rad, 10000).map(
+      generatePoints(station.latitude, station.longitude, station.radius, 10000).map(
         (point) => [point[1], point[0]],
       ),
     );
@@ -106,6 +106,7 @@ function SatelliteMap({ satellites, passes, TLEs }) {
 
     const nightAreaGeoJson = new GeoJSONTerminator();
     fixTerminator(nightAreaGeoJson);
+    console.log("passes", passes);
 
     return (
       <Map
@@ -159,8 +160,8 @@ function SatelliteMap({ satellites, passes, TLEs }) {
           />
         ))}
 
-        {satelTrajectories.map((coord) =>
-          coord ? (
+        {satelTrajectories.map((coord, index) =>
+          (coord && (!hoverIndex || hoverIndex === index)) ? (
             <GeoJson
               data={{
                 type: "FeatureCollection",
@@ -210,12 +211,12 @@ function SatelliteMap({ satellites, passes, TLEs }) {
                       type: "LineString",
                       coordinates: [
                         [
-                          satelCoords[hoverIndex][1],
-                          satelCoords[hoverIndex][0],
+                          obj.latlng[1],
+                          obj.latlng[0],
                         ],
                         [
-                          stations[obj.targetIndex].lng,
-                          stations[obj.targetIndex].lat,
+                          stations[obj.targetIndex].longitude,
+                          stations[obj.targetIndex].latitude,
                         ],
                       ],
                     },
@@ -240,10 +241,43 @@ function SatelliteMap({ satellites, passes, TLEs }) {
             />
           ))}
 
+        {hoverIndex &&
+          passes[hoverIndex].map((obj) => (
+            <GeoJson
+              data={{
+                type: "FeatureCollection",
+                features: [
+                  {
+                    type: "Feature",
+                    geometry: {
+                      type: "LineString",
+                      coordinates: TLEs[hoverIndex].next_orb.map(([lat, lng]) => [lng, lat]),
+                    },
+                    properties: {
+                      prop0: "value0",
+                      prop1: 0.0,
+                    },
+                  },
+                ],
+              }}
+              styleCallback={(feature, hover) => {
+                if (feature.geometry.type === "LineString") {
+                  return { strokeWidth: "2", stroke: "grey" };
+                }
+                return {
+                  fill: "#d4e6ec99",
+                  strokeWidth: "1",
+                  stroke: "white",
+                  r: "20",
+                };
+              }}
+            />
+          ))}
+
         {satelCoords.map(
           (coords, index) =>
             closestIndicesDists[index][1] / 1000 <=
-              stations[closestIndicesDists[index][0]].rad && (
+              stations[closestIndicesDists[index][0]].radius && (
               <GeoJson
                 data={{
                   type: "FeatureCollection",
@@ -255,8 +289,8 @@ function SatelliteMap({ satellites, passes, TLEs }) {
                         coordinates: [
                           [coords[1], coords[0]],
                           [
-                            stations[closestIndicesDists[index][0]].lng,
-                            stations[closestIndicesDists[index][0]].lat,
+                            stations[closestIndicesDists[index][0]].longitude,
+                            stations[closestIndicesDists[index][0]].latitude,
                           ],
                         ],
                       },
@@ -343,7 +377,7 @@ function SatelliteMap({ satellites, passes, TLEs }) {
                   ))}
                 </>
               ) : (
-                <p>No passages registered yet</p>
+                <p>No passes registered yet</p>
               )}
             </div>
           </Overlay>
