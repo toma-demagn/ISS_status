@@ -3,9 +3,9 @@ from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 import requests
 from apscheduler.schedulers.background import BackgroundScheduler
-from .utils.logger import log, debug
+from .utils.logger import debug
 from pytz import utc
-from .playground import genTLEPert
+from .utils.orb_mec import genTLEPert
 
 app = FastAPI()
 
