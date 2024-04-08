@@ -45,23 +45,22 @@ function SatelliteMap({ satellites }) {
     satel.longitude,
   ]);
 
-
-
+  console.log(satellites);
   const stations = STATIONS;
-
   const isIlluminated = ISS.is_illuminated;
-  const [hoverIndex, setHoverIndex] = useState(null);
 
+  const [hoverIndex, setHoverIndex] = useState(null);
   // setting the image accoring to the illumination status of the ISS
+
   const pathImage = isIlluminated ? markerImageSun : markerImageMoon;
   const [showPopup, setShowPopup] = useState(false);
-
-
   let satelTrajectories = satellites
     ? satellites.map((satel) => satel.TLE.coordinates)
     : [];
 
+
   let satelIndices = [];
+
   let distISS;
   if (satelTrajectories) {
     for (let i = 0; i < satelTrajectories.length; i++) {
@@ -74,35 +73,36 @@ function SatelliteMap({ satellites }) {
         distISS = indexDist[1];
       }
     }
-
-
     // when the ISS crossed the +180 longitude, we take the second orbit retrieved in the call to fetchTLEData
+
+
     // otherwise, the position of the ISS appeared out of the orbit line until next fetchTLEData call
     if (distISS > 400000) {
       satelTrajectories[0] = ISS.TLE
         ? ISS.TLE.next_orb
         : [];
     }
-
     // adjusting the zoomValue according to screeWidth to TILE_SIZE ratio, with 2^zoomValue = screenWidth/TILE_SIZE
+
     // see https://evilmartians.com/chronicles/how-to-build-a-better-react-map-with-pigeon-maps-and-mapbox for ref
     const screenWidth = window.innerWidth;
     const zoomValue = Math.log2(screenWidth / TILE_SIZE);
-
     const illuminations = ISS.illuminations;
-
 
     const aroundCoords = stations.map((station) =>
       generatePoints(station.latitude, station.longitude, station.radius, 10000).map(
         (point) => [point[1], point[0]],
       ),
     );
+
+
     const closestIndicesDists = findClosestIndicesDists(
       satelCoords,
       stations,
     );
-
     const nightAreaGeoJson = new GeoJSONTerminator();
+
+    console.log(hoverIndex, "satellite concerné", satellites[hoverIndex])
     fixTerminator(nightAreaGeoJson);
 
     return (
@@ -158,7 +158,7 @@ function SatelliteMap({ satellites }) {
         ))}
 
         {satelTrajectories.map((coord, index) =>
-          (coord && (!hoverIndex || hoverIndex === index)) ? (
+          (coord && (!satellites[hoverIndex] || hoverIndex === index)) ? (
             <GeoJson
               data={{
                 type: "FeatureCollection",
@@ -196,7 +196,7 @@ function SatelliteMap({ satellites }) {
           <img src={pathImage} alt="marker" className="imageISS" />
         </Marker>
 
-        {hoverIndex &&
+        {satellites[hoverIndex] &&
           satellites[hoverIndex].vis.map((obj) => (
             <GeoJson
               data={{
@@ -238,7 +238,7 @@ function SatelliteMap({ satellites }) {
             />
           ))}
 
-        {hoverIndex &&
+        {satellites[hoverIndex] &&
           satellites[hoverIndex].vis.map((obj) => (
             <GeoJson
               data={{
@@ -318,7 +318,7 @@ function SatelliteMap({ satellites }) {
             anchor={[coordinate[0], coordinate[1]]}
             width={window.innerWidth * 0.08}
             height={window.innerHeight * 0.08}
-            onMouseOver={() => setHoverIndex(index + 1)} //because we sliced the array
+            onMouseOver={() => setHoverIndex(index)} //because we sliced the array
             onMouseOut={() => setHoverIndex(null)}
           /> : <></>
         ))}
@@ -347,7 +347,7 @@ function SatelliteMap({ satellites }) {
           </Overlay>
         )}
 
-        {hoverIndex && (
+        {satellites[hoverIndex] && (
           <Overlay
             anchor={[satelCoords[hoverIndex][0], satelCoords[hoverIndex][1]]}
           >
