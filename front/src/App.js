@@ -14,6 +14,12 @@ import {
 const { REACT_APP_SATELLITE_FETCH_RATE, REACT_APP_TLE_FETCH_RATE } =
   process.env;
 
+const SATELLITES = [
+  { name: "SWOT", norad: 54754 },
+  { name: "SWOM", norad: 36036 },
+  { name: "ISS", norad: 25544 },
+];
+
 function App() {
   const [issData, setIssData] = useState(null);
   const [TLEs, setTLEs] = useState(null);
@@ -38,7 +44,7 @@ function App() {
   // the following is for fetching TLE data of the ISS in order to draw its trajectory on the map
   useEffect(() => {
     // fetching TLE data immediately and update state
-    fetchTLEs().then(setTLEs);
+    fetchTLEs(SATELLITES).then(setTLEs);
 
     // regularly fetching TLE data at the rate given in .env
     const TLEIntervalId = setInterval(() => {
@@ -52,25 +58,29 @@ function App() {
   if (TLEs && issData) {
     let coordinates = TLEs.map((TLE) => TLE.coordinates);
     let coordinatesExtended = TLEs.map((TLE) => TLE.coordinates.concat(TLE.next_orb));
-    console.log("les coordonnées", coordinates)
-    console.log("les coordonnées étendues", coordinatesExtended)
 
     vis = computeVis(coordinatesExtended, STATIONS);
-    console.log("vis", vis)
-    issData.name = "ISS";
-    const satellites = [issData, { name: "SWOT" }, { name: "SWOM" }];
+    const satellites = [
+      ...SATELLITES.slice(0, SATELLITES.length-1), { ...issData, ...SATELLITES[2] }
+    ];
     const indexDistISS = findClosestIndexDist(coordinates[0], [
       issData.latitude,
       issData.longitude,
     ]);
-    for (let i = 1; i < satellites.length; i++) {
-      const index = (indexDistISS[0] + 1500 * i) % coordinates[i].length;
-      satellites[i].latitude = coordinates[i][index][0];
-      satellites[i].longitude = coordinates[i][index][1];
+    for (let i = 0; i < satellites.length; i++) {
+      if (satellites[i].name != "ISS"){
+        const index = (indexDistISS[0] + 1500 * i) % coordinates[i].length;
+        satellites[i].latitude = coordinates[i][index][0];
+        satellites[i].longitude = coordinates[i][index][1];
+      }
+    }
+    for (let i = 0; i<satellites.length; i++){
+      satellites[i].TLE = TLEs[i];
+      satellites[i].vis = vis[i];
     }
     return (
       <div className="App">
-        <SatelliteMap satellites={satellites} TLEs={TLEs} passes={vis} />
+        <SatelliteMap satellites={satellites}/>
       </div>
     );
   } else {

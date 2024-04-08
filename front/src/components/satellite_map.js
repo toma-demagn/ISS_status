@@ -19,7 +19,6 @@ const ISS_ORBIT_INCLINATION_DEG = 51.6;
 // this HEIGHT_RATIO takes into accound the orbit inclination in order to crop out some area that the ISS doesn't cover
 const HEIGHT_RATIO = ISS_ORBIT_INCLINATION_DEG / 90.0;
 
-const ISS_ORBIT_TIME_MS = 324000000;
 
 const { REACT_APP_MAPBOX_ACCESS_TOKEN } = process.env;
 
@@ -34,11 +33,10 @@ function fixTerminator(nightAreaGeoJson) {
   coords[0][1] = -89;
 }
 
-function SatelliteMap({ satellites, passes, TLEs }) {
+function SatelliteMap({ satellites }) {
   let ISS = satellites.filter((satel) => {
     return satel.name === "ISS";
   })[0];
-  console.log("l'iss", ISS);
   let issLatitude = ISS.latitude ? ISS.latitude : 0;
   let issLongitude = ISS.longitude ? ISS.longitude : 0;
 
@@ -46,6 +44,7 @@ function SatelliteMap({ satellites, passes, TLEs }) {
     satel.latitude,
     satel.longitude,
   ]);
+
 
 
   const stations = STATIONS;
@@ -57,23 +56,21 @@ function SatelliteMap({ satellites, passes, TLEs }) {
   const pathImage = isIlluminated ? markerImageSun : markerImageMoon;
   const [showPopup, setShowPopup] = useState(false);
 
-  const TLEData = TLEs ? TLEs[0] : undefined;
 
-  // reversing lng, and lat in the array
-  let satelTrajectories = TLEs
-    ? TLEs.map((TLEData) => TLEData.coordinates)
+  let satelTrajectories = satellites
+    ? satellites.map((satel) => satel.TLE.coordinates)
     : [];
 
   let satelIndices = [];
   let distISS;
-  if (satelTrajectories[0]) {
+  if (satelTrajectories) {
     for (let i = 0; i < satelTrajectories.length; i++) {
       const indexDist = findClosestIndexDist(
         satelTrajectories[i],
         [satelCoords[i][0], satelCoords[i][1]],
       );
       satelIndices.push(indexDist[0]);
-      if (i == 0) {
+      if (satellites[i].name === "ISS") {
         distISS = indexDist[1];
       }
     }
@@ -82,8 +79,8 @@ function SatelliteMap({ satellites, passes, TLEs }) {
     // when the ISS crossed the +180 longitude, we take the second orbit retrieved in the call to fetchTLEData
     // otherwise, the position of the ISS appeared out of the orbit line until next fetchTLEData call
     if (distISS > 400000) {
-      satelTrajectories[0] = TLEData
-        ? TLEData.next_orb
+      satelTrajectories[0] = ISS.TLE
+        ? ISS.TLE.next_orb
         : [];
     }
 
@@ -93,6 +90,7 @@ function SatelliteMap({ satellites, passes, TLEs }) {
     const zoomValue = Math.log2(screenWidth / TILE_SIZE);
 
     const illuminations = ISS.illuminations;
+
 
     const aroundCoords = stations.map((station) =>
       generatePoints(station.latitude, station.longitude, station.radius, 10000).map(
@@ -106,7 +104,6 @@ function SatelliteMap({ satellites, passes, TLEs }) {
 
     const nightAreaGeoJson = new GeoJSONTerminator();
     fixTerminator(nightAreaGeoJson);
-    console.log("passes", passes);
 
     return (
       <Map
@@ -200,7 +197,7 @@ function SatelliteMap({ satellites, passes, TLEs }) {
         </Marker>
 
         {hoverIndex &&
-          passes[hoverIndex].map((obj) => (
+          satellites[hoverIndex].vis.map((obj) => (
             <GeoJson
               data={{
                 type: "FeatureCollection",
@@ -242,7 +239,7 @@ function SatelliteMap({ satellites, passes, TLEs }) {
           ))}
 
         {hoverIndex &&
-          passes[hoverIndex].map((obj) => (
+          satellites[hoverIndex].vis.map((obj) => (
             <GeoJson
               data={{
                 type: "FeatureCollection",
@@ -251,7 +248,7 @@ function SatelliteMap({ satellites, passes, TLEs }) {
                     type: "Feature",
                     geometry: {
                       type: "LineString",
-                      coordinates: TLEs[hoverIndex].next_orb.map(([lat, lng]) => [lng, lat]),
+                      coordinates: satellites[hoverIndex].TLE.next_orb.map(([lat, lng]) => [lng, lat]),
                     },
                     properties: {
                       prop0: "value0",
@@ -316,14 +313,14 @@ function SatelliteMap({ satellites, passes, TLEs }) {
             ),
         )}
 
-        {satelCoords.slice(1).map((coordinate, index) => (
+        {satelCoords.map((coordinate, index) => (satellites[index].name != "ISS" ?
           <Marker
             anchor={[coordinate[0], coordinate[1]]}
             width={window.innerWidth * 0.08}
             height={window.innerHeight * 0.08}
             onMouseOver={() => setHoverIndex(index + 1)} //because we sliced the array
             onMouseOut={() => setHoverIndex(null)}
-          />
+          /> : <></>
         ))}
 
         {/*creating the popup with formatted illumination string*/}
@@ -361,17 +358,17 @@ function SatelliteMap({ satellites, passes, TLEs }) {
                 padding: "10px",
               }}
             >
-              {passes && passes[hoverIndex].length > 0 ? (
+              {satellites && satellites[hoverIndex].vis.length > 0 ? (
                 <>
-                  <h2>{`Next ${passes[hoverIndex].length} visibilities:`}</h2>
-                  {passes[hoverIndex].map((pass, index) => (
+                  <h2>{`Next ${satellites[hoverIndex].vis.length} visibilities:`}</h2>
+                  {satellites[hoverIndex].vis.map((pass, index) => (
                     <pre
                       key={index}
                     >{`${stations[pass.targetIndex].name} in ${parseInt(
                       nextVisiWaitTime(
                         satelIndices[hoverIndex],
                         pass.index,
-                        TLEs[hoverIndex],
+                        satellites[hoverIndex].TLE,
                       ),
                     )}s`}</pre>
                   ))}

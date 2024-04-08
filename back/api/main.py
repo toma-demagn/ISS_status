@@ -5,6 +5,7 @@ import requests
 from apscheduler.schedulers.background import BackgroundScheduler
 from .utils.logger import log, debug
 from pytz import utc
+from .playground import genTLEPert
 
 app = FastAPI()
 
@@ -43,6 +44,10 @@ async def get_illumination(limit: int = Query(DEFAULT_ILLUMINATION_TIME_WINDOWS_
 async def get_position():
     return iss_status
 
+@app.get("/tle/norad/{norad}")
+def get_tle(norad: int):
+    tle = genTLEPert(norad)
+    return {"line1": tle[0], "line2": tle[1]}
 
 def track_illumination(visibility, timestamp):
     curr_illumination_state = visibility == 'daylight'
@@ -69,6 +74,7 @@ def register_iss_status(latitude, longitude, visibility):
 def fetch_iss_data():
     iss_data = requests.get('https://api.wheretheiss.at/v1/satellites/25544').json()
     return iss_data
+
 
 
 @debug

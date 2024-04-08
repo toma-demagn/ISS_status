@@ -1,7 +1,7 @@
 import axios from "axios";
 import { getGroundTracks, getMeanMotion } from "tle.js";
 import haversine from "haversine-distance";
-var TLE = require("tle");
+var tle = require("tle");
 
 const SECONDS_PER_DAY = 86400;
 const RADIUS = 2500.64; // tan(70 deg) * 408 * 6471 / (6878);
@@ -29,7 +29,7 @@ const MADRID = {
 const KIRIBATI = {
   latitude: 35,
   longitude: 140,
-  radius: RADIUS-100,
+  radius: RADIUS - 100,
   name: "Kiribati",
   color: "rgb(255,219,0)",
 };
@@ -54,33 +54,6 @@ export const fetchSatelliteData = async (nb_windows) => {
   }
 };
 
-export const fetchTLE = async () => {
-  try {
-    const response = await axios.get(
-      "https://api.wheretheiss.at/v1/satellites/25544/tles",
-    );
-    const tle = response.data;
-    const header = tle.header;
-    const line1 = tle.line1;
-    const line2 = tle.line2;
-    const tleStr = `${header}\n${line1}\n${line2}`;
-    const threeOrbitsArr = await getGroundTracks({
-      tle: tleStr,
-      stepMS: 1000,
-      isLngLatFormat: false,
-    });
-
-    // getting the current time to store the last call's timestamp
-    return {
-      coordinates: threeOrbitsArr[1],
-      next_orb: threeOrbitsArr[2],
-      updated_at: Date.now(),
-    };
-  } catch (error) {
-    console.error(`Error fetching satellite data: ${error}`);
-  }
-};
-
 function gentles() {
   const line1 =
     "1 00005U          62165.28495062  .00000023  00000-0  28098-4 0    00";
@@ -99,50 +72,63 @@ function gentles() {
   //    "2 48274  41.4649 228.3616 0009793 250.2407 109.7377 15.64042462166158";
 }
 
-export const fetchTLEs = async () => {
+export const fetchTLE = async (norad) => {
   try {
-    /*const response = await axios.get(
-      "https://api.wheretheiss.at/v1/satellites/25544/tles",
-    );*/
-    const response = await axios.get(
-      "https://random.outpace.fr/backend/tle/norad/25544",
-    );
-    const tle = response.data;
-    const header = "ISS (Zaria)";
-    const line1 = tle.line1;
-    const line2 = tle.line2;
-    const tleStr = `${header}\n${line1}\n${line2}`;
-    const meanMotion = getMeanMotion(tleStr);
-    const orbDur = SECONDS_PER_DAY / meanMotion;
-    const threeOrbitsArr = await getGroundTracks({
-      tle: tleStr,
-      stepMS: 1000,
-      isLngLatFormat: false,
-    });
+    let response;
+    if (norad === 25544) {
+      response = await axios.get(
+        "https://api.wheretheiss.at/v1/satellites/25544/tles",
+      );
+      const tle = response.data;
+      const header = tle.header;
+      const line1 = tle.line1;
+      const line2 = tle.line2;
+      const tleStr = `${header}\n${line1}\n${line2}`;
+      const meanMotion = getMeanMotion(tleStr);
+      const orbDur = SECONDS_PER_DAY / meanMotion;
+      const threeOrbitsArr = await getGroundTracks({
+        tle: tleStr,
+        stepMS: 1000,
+        isLngLatFormat: false,
+      });
 
-    console.log("l'orbite de l'ISS", threeOrbitsArr);
-    let threeOrbitsArrs = [];
-    const lesTLEs = gentles();
-    for (const TLE of lesTLEs) {
-      const tleStr2 = TLE.line1 + "\n" + TLE.line2;
+      console.log("l'orbite de l'ISS", threeOrbitsArr);
+      return {
+        coordinates: threeOrbitsArr[1],
+        next_orb: threeOrbitsArr[2],
+        updated_at: Date.now(),
+        orb_duration: orbDur,
+      };
+    } else {
+      const response = await axios.get(
+        `https://random.outpace.fr/backend/tle/norad/${norad}`,
+      );
+      const tle = response.data;
+      const tleStr2 = tle.line1 + "\n" + tle.line2;
       const groundTracksData = await getGroundTracks({
         tle: tleStr2,
         stepMS: 1000,
         isLngLatFormat: false,
       });
-      threeOrbitsArrs.push({
+      return {
         coordinates: groundTracksData[1],
         orb_duration: SECONDS_PER_DAY / getMeanMotion(tleStr2),
+        updated_at: Date.now(),
         next_orb: groundTracksData[2],
-      });
+      };
     }
-    threeOrbitsArrs.unshift({
-      coordinates: threeOrbitsArr[1],
-      next_orb: threeOrbitsArr[2],
-      updated_at: Date.now(),
-      orb_duration: orbDur,
-    });
-    // getting the current time to store the last call's timestamp
+  } catch (error) {
+    console.error(`Error fetching satellite data: ${error}`);
+  }
+};
+
+export const fetchTLEs = async (satellites) => {
+  try {
+    let threeOrbitsArrs = [];
+    for (const satel of satellites) {
+      const tleData = await fetchTLE(satel.norad);
+      threeOrbitsArrs.push(tleData);
+    }
     console.log("theArr", threeOrbitsArrs);
     return threeOrbitsArrs;
   } catch (error) {
@@ -219,27 +205,34 @@ export function findClosestIndicesDists(satelCoords, stations) {
   return closestIndicesDists;
 }
 
-function myHaversine(lat1, lon1, lat2, lon2, unit="m") {
-    if ((lat1 == lat2) && (lon1 == lon2)) {
-        return 0;
+function myHaversine(lat1, lon1, lat2, lon2, unit = "m") {
+  if (lat1 == lat2 && lon1 == lon2) {
+    return 0;
+  } else {
+    var radlat1 = (Math.PI * lat1) / 180;
+    var radlat2 = (Math.PI * lat2) / 180;
+    var theta = lon1 - lon2;
+    var radtheta = (Math.PI * theta) / 180;
+    var dist =
+      Math.sin(radlat1) * Math.sin(radlat2) +
+      Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
+    if (dist > 1) {
+      dist = 1;
     }
-    else {
-        var radlat1 = Math.PI * lat1/180;
-        var radlat2 = Math.PI * lat2/180;
-        var theta = lon1-lon2;
-        var radtheta = Math.PI * theta/180;
-        var dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
-        if (dist > 1) {
-            dist = 1;
-        }
-        dist = Math.acos(dist);
-        dist = dist * 180/Math.PI;
-        dist = dist * 60 * 1.1515;
-        if (unit=="K") { dist = dist * 1.609344 }
-        if (unit=="m") { dist = dist * 1609.344 }
-        if (unit=="N") { dist = dist * 0.8684 }
-        return dist;
+    dist = Math.acos(dist);
+    dist = (dist * 180) / Math.PI;
+    dist = dist * 60 * 1.1515;
+    if (unit == "K") {
+      dist = dist * 1.609344;
     }
+    if (unit == "m") {
+      dist = dist * 1609.344;
+    }
+    if (unit == "N") {
+      dist = dist * 0.8684;
+    }
+    return dist;
+  }
 }
 
 function findNextVis(arr, targets) {
