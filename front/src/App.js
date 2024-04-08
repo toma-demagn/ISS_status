@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import SATELLITES from './assets/satellites.json'
 import queryString from "query-string";
 import "./App.css";
 import SatelliteMap from "./components/satellite_map";
@@ -14,11 +15,6 @@ import {
 const { REACT_APP_SATELLITE_FETCH_RATE, REACT_APP_TLE_FETCH_RATE } =
   process.env;
 
-const SATELLITES = [
-  { name: "SWOT", norad: 54754 },
-  { name: "SWOM", norad: 36036 },
-  { name: "ISS", norad: 25544 },
-];
 
 function App() {
   const [issData, setIssData] = useState(null);

@@ -1,0 +1,23 @@
+[
+  {
+    "latitude": -22.36,
+    "longitude": -43.25,
+    "radius": 2500.64,
+    "name": "Paris",
+    "color": "rgba(255,0,0)"
+  },
+  {
+    "latitude": 40.4168,
+    "longitude": -3.7038,
+    "radius": 2500.64,
+    "name": "Madrid",
+    "color": "rgb(183,0,255)"
+  },
+  {
+    "latitude": 35,
+    "longitude": 140,
+    "radius": 2400.64,
+    "name": "Kiribati",
+    "color": "rgb(255,219,0)"
+  }
+]
