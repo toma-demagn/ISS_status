@@ -16,6 +16,9 @@ export const fetchSatelliteData = async (nb_windows) => {
     const response = await axios.get(
       `${REACT_APP_BACKEND_URL}/iss/position`,
     );
+    if (response.status !== 200) {
+      throw new Error('Failed to fetch TLE data');
+    }
     let data = response.data;
     const url = nb_windows
       ? `${REACT_APP_BACKEND_URL}/iss/illumination?limit=${nb_windows}`
@@ -37,6 +40,9 @@ export const fetchTLE = async (norad) => {
       response = await axios.get(
         "https://api.wheretheiss.at/v1/satellites/25544/tles",
       );
+      if (response.status !== 200) {
+        throw new Error('Failed to fetch TLE data');
+      }
       const tle = response.data;
       const header = tle.header;
       const line1 = tle.line1;
@@ -50,7 +56,7 @@ export const fetchTLE = async (norad) => {
         isLngLatFormat: false,
       });
 
-      console.log("l'orbite de l'ISS", threeOrbitsArr);
+      console.log("ISS orbit", threeOrbitsArr);
       return {
         coordinates: threeOrbitsArr[1],
         next_orb: threeOrbitsArr[2],
@@ -61,6 +67,9 @@ export const fetchTLE = async (norad) => {
       const response = await axios.get(
         `${REACT_APP_BACKEND_URL}/tle/norad/${norad}`,
       );
+      if (response.status !== 200) {
+        throw new Error('Failed to fetch TLE data');
+      }
       const tle = response.data;
       const tleStr2 = tle.line1 + "\n" + tle.line2;
       const groundTracksData = await getGroundTracks({
@@ -87,7 +96,6 @@ export const fetchTLEs = async (satellites) => {
       const tleData = await fetchTLE(satel.norad);
       threeOrbitsArrs.push(tleData);
     }
-    console.log("theArr", threeOrbitsArrs);
     return threeOrbitsArrs;
   } catch (error) {
     console.error(`Error fetching satellite data: ${error}`);

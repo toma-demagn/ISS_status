@@ -7,6 +7,7 @@ from .utils.logger import debug
 from pytz import utc
 from .utils.orb_mec import genTLEPert
 
+
 app = FastAPI()
 
 # Add CORS middleware
@@ -72,18 +73,22 @@ def register_iss_status(latitude, longitude, visibility):
 
 
 def fetch_iss_data():
-    iss_data = requests.get('https://api.wheretheiss.at/v1/satellites/25544').json()
+    response = requests.get('https://api.wheretheiss.at/v1/satellites/25544')
+    if response.status_code != 200:
+        raise Exception('Failed to fetch ISS data')
+    iss_data = response.json()
     return iss_data
-
-
 
 @debug
 def fetch_and_track():
-    result = fetch_iss_data()
-    if isinstance(result.get('latitude'), float) and isinstance(result.get('longitude'), float) and isinstance(
-            result.get('timestamp'), int) and isinstance(result.get('visibility'), str):
-        register_iss_status(result['latitude'], result['longitude'], result['visibility'])
-        track_illumination(result['visibility'], result['timestamp'])
+    try:
+        result = fetch_iss_data()
+        if isinstance(result.get('latitude'), float) and isinstance(result.get('longitude'), float) and isinstance(
+                result.get('timestamp'), int) and isinstance(result.get('visibility'), str):
+            register_iss_status(result['latitude'], result['longitude'], result['visibility'])
+            track_illumination(result['visibility'], result['timestamp'])
+    except Exception as error:
+        print(f"Error fetching and tracking ISS data: {error}")
 
 
 scheduler = BackgroundScheduler(timezone=utc)

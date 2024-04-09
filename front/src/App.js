@@ -26,25 +26,33 @@ function App() {
     const nbWindows = params.nb_windows;
 
     // fetching satellite data immediately and update state
-    fetchSatelliteData(nbWindows).then(setIssData);
+    fetchSatelliteData(nbWindows)
+        .then(setIssData)
+        .catch((error) => console.error(`Error fetching satellite data: ${error}`));
 
     // setting up interval to fetch satellite data regularly, according to the .env value
     const intervalId = setInterval(() => {
-      fetchSatelliteData(nbWindows).then(setIssData);
+      fetchSatelliteData(nbWindows)
+          .then(setIssData)
+          .catch((error) => console.error(`Error fetching satellite data: ${error}`));
     }, REACT_APP_SATELLITE_FETCH_RATE);
 
     // clearing interval on component unmount
     return () => clearInterval(intervalId);
   }, []);
 
-  // the following is for fetching TLE data of the ISS in order to draw its trajectory on the map
+// the following is for fetching TLE data of the ISS in order to draw its trajectory on the map
   useEffect(() => {
     // fetching TLE data immediately and update state
-    fetchTLEs(SATELLITES).then(setTLEs);
+    fetchTLEs(SATELLITES)
+        .then(setTLEs)
+        .catch((error) => console.error(`Error fetching TLE data: ${error}`));
 
     // regularly fetching TLE data at the rate given in .env
     const TLEIntervalId = setInterval(() => {
-      fetchTLEs().then(setTLEs);
+      fetchTLEs()
+          .then(setTLEs)
+          .catch((error) => console.error(`Error fetching TLE data: ${error}`));
     }, REACT_APP_TLE_FETCH_RATE);
 
     // clearing interval on component unmount
